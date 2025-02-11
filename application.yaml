@@ -1,3 +1,5 @@
+# ------------------------------------------------------------
+# Application for your main .NET app
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
@@ -12,15 +14,13 @@ spec:
   destination: 
     server: https://kubernetes.default.svc
     namespace: myapp
-
   syncPolicy:
     syncOptions:
-    - CreateNamespace=true
-
+      - CreateNamespace=true
     automated:
       selfHeal: true
       prune: true
-
+---
 # Application for Grafana
 apiVersion: argoproj.io/v1alpha1
 kind: Application
@@ -41,8 +41,89 @@ spec:
           value: "false"     # Disable persistence if you don't need it locally
   destination:
     server: https://kubernetes.default.svc
-    namespace: monitoring   # You can change or create this namespace as needed
+    namespace: monitoring   
   syncPolicy:
+    syncOptions:
+      - CreateNamespace=true
     automated:
       prune: true
       selfHeal: true
+---
+# Application for Loki (Logs)
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: loki
+  namespace: argocd
+spec:
+  project: default
+  source:
+    chart: loki-stack
+    repoURL: https://grafana.github.io/helm-charts
+    targetRevision: "2.8.0"  # Replace with a valid version available in the repository
+    helm:
+      parameters:
+        - name: persistence.enabled
+          value: "false"   # Disable persistence for local development
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: monitoring
+  syncPolicy:
+    syncOptions:
+      - CreateNamespace=true
+    automated:
+      prune: true
+      selfHeal: true
+---
+# Application for Tempo (Traces)
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: tempo
+  namespace: argocd
+spec:
+  project: default
+  source:
+    chart: tempo
+    repoURL: https://grafana.github.io/helm-charts
+    targetRevision: "1.18.1 "  
+    helm:
+      parameters:
+        - name: service.type
+          value: ClusterIP  # Change to NodePort if you need external access
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: monitoring
+  syncPolicy:
+    syncOptions:
+      - CreateNamespace=true
+    automated:
+      prune: true
+      selfHeal: true
+---
+# Application for Mimir (Metrics)
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: mimir-distributed
+  namespace: argocd
+spec:
+  project: default
+  source:
+    chart: mimir-distributed         # Verify the chart name; it could be "mimir" or "grafana-mimir" depending on the repo
+    repoURL: https://grafana.github.io/helm-charts  # Or use the dedicated Mimir charts repository if applicable
+    targetRevision: "5.6.0"  # Replace with a valid Mimir chart version
+    helm:
+      parameters:
+        - name: service.type
+          value: ClusterIP  # Use NodePort if needed for external access
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: monitoring
+  syncPolicy:
+    syncOptions:
+      - CreateNamespace=true
+    automated:
+      prune: true
+      selfHeal: true
+# ------------------------------------------------------------
