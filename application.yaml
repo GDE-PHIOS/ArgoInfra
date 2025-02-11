@@ -5,9 +5,8 @@ metadata:
   namespace: argocd
 spec:
   project: default
-
   source:
-    repoURL: https://gitlab.com/nanuchi/argocd-app-config.git
+    repoURL: https://github.com/KiyanDev/PlayGroundArgoCd
     targetRevision: HEAD
     path: dev
   destination: 
@@ -21,3 +20,29 @@ spec:
     automated:
       selfHeal: true
       prune: true
+
+# Application for Grafana
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: grafana
+  namespace: argocd
+spec:
+  project: default
+  source:
+    chart: grafana
+    repoURL: https://grafana.github.io/helm-charts
+    targetRevision: "8.9.0"  # Adjust the version as needed
+    helm:
+      parameters:
+        - name: service.type
+          value: NodePort    # Using NodePort for easy access in Minikube
+        - name: persistence.enabled
+          value: "false"     # Disable persistence if you don't need it locally
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: monitoring   # You can change or create this namespace as needed
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
