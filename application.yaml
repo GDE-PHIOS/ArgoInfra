@@ -36,15 +36,16 @@ spec:
     helm:
       parameters:
         - name: service.type
-          value: NodePort    # Using NodePort for easy access in Minikube
+          value: NodePort    
         - name: persistence.enabled
-          value: "false"     # Disable persistence if you don't need it locally
+          value: "false"     
   destination:
     server: https://kubernetes.default.svc
     namespace: monitoring   
   syncPolicy:
     syncOptions:
       - CreateNamespace=true
+      - RespectIgnoreDifferences=true
     automated:
       prune: true
       selfHeal: true
@@ -60,11 +61,11 @@ spec:
   source:
     chart: loki-stack
     repoURL: https://grafana.github.io/helm-charts
-    targetRevision: "2.8.0"  # Replace with a valid version available in the repository
+    targetRevision: "2.8.0"  
     helm:
       parameters:
         - name: persistence.enabled
-          value: "false"   # Disable persistence for local development
+          value: "false"   
   destination:
     server: https://kubernetes.default.svc
     namespace: monitoring
@@ -90,7 +91,7 @@ spec:
     helm:
       parameters:
         - name: service.type
-          value: ClusterIP  # Change to NodePort if you need external access
+          value: ClusterIP  
   destination:
     server: https://kubernetes.default.svc
     namespace: monitoring
@@ -110,13 +111,13 @@ metadata:
 spec:
   project: default
   source:
-    chart: mimir-distributed         # Verify the chart name; it could be "mimir" or "grafana-mimir" depending on the repo
-    repoURL: https://grafana.github.io/helm-charts  # Or use the dedicated Mimir charts repository if applicable
-    targetRevision: "5.6.0"  # Replace with a valid Mimir chart version
+    chart: mimir-distributed         
+    repoURL: https://grafana.github.io/helm-charts  
+    targetRevision: "5.6.0"  
     helm:
       parameters:
         - name: service.type
-          value: ClusterIP  # Use NodePort if needed for external access
+          value: ClusterIP  
   destination:
     server: https://kubernetes.default.svc
     namespace: monitoring
