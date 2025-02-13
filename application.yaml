@@ -113,13 +113,15 @@ metadata:
 spec:
   project: default
   source:
-    repoURL: 'https://github.com/your-user/ArgoCDRepo.git'
-    targetRevision: main
+    repoURL: 'https://github.com/KiyanDev/PlayGroundArgoCd'
+    targetRevision: HEAD
     path: dev
   destination:
     server: https://kubernetes.default.svc
-    namespace: argocd
+    namespace: argocd-config
   syncPolicy:
+    syncOptions:
+    - CreateNamespace=true
     automated:
       prune: true
       selfHeal: true
